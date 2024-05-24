@@ -1,4 +1,3 @@
-/* eslint-disable */
 <template>
     <div class="todo-app">
         <p class="title">My todo app</p>
@@ -8,96 +7,120 @@
                 <option value="Completed">Completed</option>
                 <option value="Pending">Pending</option>
             </select>
-            <!-- <button type="submit">Submit</button> -->
-            <button className="button-28" type="submit" role="button">
-               Submit
+            <button class="button-28" type="submit" role="button">
+                Submit
             </button>
         </form>
-        <ul class="todo-list">
-            <li v-for="(task, index) in tasks" :key="index" class="todo-item">
+        <label for="filter">Filter by status</label>
+        <select name="filter" id="filter" v-model="filterStatus">
+            <option value="">All</option>
+            <option value="Completed">Completed</option>
+            <option value="Pending">Pending</option>
+        </select>
+    </div>
+   
+    <table class="table container">
+        <thead>
+            <tr>
+                <th scope="col">Task Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created At</th>
+                <th scope="col">Updated At</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="(task, index) in filteredTasks" :key="index" class="todo-item">
                 <template v-if="editIndex !== index">
-                    <span>{{ task.text }}</span>
-                    <p>{{ task.status }}</p>
-                    <div class="btn-group">
+                    <td>{{ task.text }}</td>
+                    <td>{{ task.status }}</td>
+                    <td>{{ task.createdAt }}</td>
+                    <td>{{ task.updatedAt || 'N/A' }}</td>
+                    <td class="btn-group">
                         <button class="btn btn-danger" @click="deleteTask(index)">Delete</button>
                         <button class="btn btn-info" @click="startUpdateTask(index, task)">Update</button>
-                    </div>
+                    </td>
                 </template>
                 <template v-else>
-                    <input type="text" v-model="editText" />
-                    <select v-model="editStatus">
-                        <option value="Completed">Completed</option>
-                        <option value="Pending">Pending</option>
-                    </select>
-                    <div class="btn-group">
-                        <button class="btn btn-success" @click="saveUpdateTask(index)">Save</button>
-                        <button class="btn btn-warning" @click="cancelUpdateTask">Cancel</button>
-                    </div>
+                    <td colspan="5">
+                        <input autocomplete="off" name="email" id="Email" v-model="editText" class="input" type="text">
+                        <select v-model="editStatus">
+                            <option value="Completed">Completed</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                        <div class="btn-group">
+                            <button class="btn btn-success" @click="saveUpdateTask(index)">Save</button>
+                            <button class="btn btn-warning" @click="cancelUpdateTask">Cancel</button>
+                        </div>
+                    </td>
                 </template>
-            </li>
-        </ul>
-    </div>
+            </tr>
+        </tbody>
+    </table>
 </template>
 
+
+
+
+
+
+
 <script>
-import { ref } from 'vue'
+import { mapState, mapActions } from 'vuex';
 
 export default {
-    name: "TodoItem",
-    setup() {
-        const text = ref("")
-        const status = ref("Completed")
-        const tasks = ref([])
-
-        const editIndex = ref(null)
-        const editText = ref("")
-        const editStatus = ref("Completed")
-
-        function submitTodo() {
-            tasks.value.push({ text: text.value, status: status.value })
-            text.value = ""
-            status.value = "Completed"
-        }
-
-        function deleteTask(index) {
-            tasks.value.splice(index, 1)
-        }
-
-        function startUpdateTask(index, task) {
-            editIndex.value = index
-            editText.value = task.text
-            editStatus.value = task.status
-        }
-
-        function saveUpdateTask(index) {
-            tasks.value[index] = { text: editText.value, status: editStatus.value }
-            editIndex.value = null
-            editText.value = ""
-            editStatus.value = "Completed"
-        }
-
-        function cancelUpdateTask() {
-            editIndex.value = null
-            editText.value = ""
-            editStatus.value = "Completed"
-        }
-
+    name: 'TodoItem',
+    data() {
         return {
-            submitTodo,
-            deleteTask,
-            startUpdateTask,
-            saveUpdateTask,
-            cancelUpdateTask,
-            text,
-            status,
-            tasks,
-            editIndex,
-            editText,
-            editStatus
+            text: '',
+            status: 'Completed',
+            editIndex: null,
+            editText: '',
+            editStatus: 'Completed',
+            filterStatus: ''
+        };
+    },
+    computed: {
+        ...mapState(['tasks']),
+        filteredTasks() {
+            if (!this.filterStatus) {
+                return this.tasks;
+            }
+            return this.tasks.filter(task => task.status === this.filterStatus);
+        }
+    },
+    methods: {
+        ...mapActions(['addTask', 'deleteTask', 'updateTask']),
+        submitTodo() {
+            const now = new Date().toLocaleString();
+            this.addTask({ text: this.text, status: this.status, createdAt: now, updatedAt: null });
+            this.text = '';
+            this.status = 'Completed';
+        },
+        startUpdateTask(index, task) {
+            this.editIndex = index;
+            this.editText = task.text;
+            this.editStatus = task.status;
+        },
+        saveUpdateTask(index) {
+            const now = new Date().toLocaleString();
+            this.updateTask({ index, task: { ...this.tasks[index], text: this.editText, status: this.editStatus, updatedAt: now } });
+            this.editIndex = null;
+            this.editText = '';
+            this.editStatus = 'Completed';
+        },
+        cancelUpdateTask() {
+            this.editIndex = null;
+            this.editText = '';
+            this.editStatus = 'Completed';
         }
     }
-}
+};
+
 </script>
+
+
+
 
 <style scoped>
 .todo-app {
@@ -137,7 +160,7 @@ export default {
 }
 
 .todo-item {
-    display: flex;
+    /* display: flex; */
     justify-content: space-between;
     align-items: center;
     padding: 10px;
@@ -235,6 +258,31 @@ export default {
 .button-28:active {
     box-shadow: none;
     transform: translateY(0);
+}
+
+tr {
+    text-align: center;
+}
+
+/* input styles */
+.input {
+    max-width: 190px;
+    height: 44px;
+    background-color: #05060f0a;
+    border-radius: .5rem;
+    padding: 0 1rem;
+    border: 2px solid transparent;
+    font-size: 1rem;
+    transition: border-color .3s cubic-bezier(.25, .01, .25, 1) 0s, color .3s cubic-bezier(.25, .01, .25, 1) 0s, background .2s cubic-bezier(.25, .01, .25, 1) 0s;
+}
+
+.input:hover {
+    outline: none;
+    border-color: #05060f;
+}
+
+.input:focus {
+    color: #05060fc2;
 }
 
 @media (max-width: 600px) {
