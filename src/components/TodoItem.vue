@@ -1,4 +1,6 @@
 <template>
+
+
     <div class="todo-app">
         <p class="title">My todo app</p>
         <form @submit.prevent="submitTodo" class="todo-form">
@@ -7,23 +9,33 @@
                 <option value="Completed">Completed</option>
                 <option value="Pending">Pending</option>
             </select>
-            <button class="button-28" type="submit" role="button">
-                Submit
-            </button>
+            <select name="category" v-model="category" required>
+                <option value="Work">Work</option>
+                <option value="Personal">Personal</option>
+                <option value="Shopping">Shopping</option>
+            </select>
+            <div class="submit-button">
+                <button class="button-28" type="submit" role="button">
+                    Submit
+                </button>
+            </div>
         </form>
+        <!-- filter for tasks -->
         <label for="filter">Filter by status</label>
         <select name="filter" id="filter" v-model="filterStatus">
             <option value="">All</option>
             <option value="Completed">Completed</option>
             <option value="Pending">Pending</option>
         </select>
+
     </div>
-   
+
     <table class="table container">
         <thead>
             <tr>
                 <th scope="col">Task Name</th>
                 <th scope="col">Status</th>
+                <th scope="col">Category</th>
                 <th scope="col">Created At</th>
                 <th scope="col">Updated At</th>
                 <th scope="col">Actions</th>
@@ -34,6 +46,7 @@
                 <template v-if="editIndex !== index">
                     <td>{{ task.text }}</td>
                     <td>{{ task.status }}</td>
+                    <td>{{ task.category }}</td>
                     <td>{{ task.createdAt }}</td>
                     <td>{{ task.updatedAt || 'N/A' }}</td>
                     <td class="btn-group">
@@ -74,6 +87,7 @@ export default {
         return {
             text: '',
             status: 'Completed',
+            category: 'Work',
             editIndex: null,
             editText: '',
             editStatus: 'Completed',
@@ -93,9 +107,10 @@ export default {
         ...mapActions(['addTask', 'deleteTask', 'updateTask']),
         submitTodo() {
             const now = new Date().toLocaleString();
-            this.addTask({ text: this.text, status: this.status, createdAt: now, updatedAt: null });
+            this.addTask({ text: this.text, status: this.status, createdAt: now, updatedAt: null, category: this.category });
             this.text = '';
             this.status = 'Completed';
+            this.category = 'Work';
         },
         startUpdateTask(index, task) {
             this.editIndex = index;
@@ -145,13 +160,16 @@ export default {
 
 .todo-form input,
 .todo-form select,
-.todo-form button {
+.todo-form button,
+select {
     padding: 10px;
     font-size: 1em;
 }
-
+label{
+    margin-right: 10px;
+}
 .todo-form input {
-    grid-column: span 2;
+    /* grid-column: span 2; */
 }
 
 .todo-list {
@@ -213,7 +231,10 @@ export default {
     background-color: #f1c40f;
     color: white;
 }
-
+.submit-button{
+    display: flex;
+    justify-content: center;
+}
 /* search button */
 .button-28 {
     appearance: none;

@@ -1,35 +1,3 @@
-// import { createStore } from 'vuex';
-
-// export default createStore({
-//     state: {
-//         tasks: []
-//     },
-//     mutations: {
-//         ADD_TASK(state, task) {
-//             state.tasks.push(task);
-//         },
-//         DELETE_TASK(state, index) {
-//             state.tasks.splice(index, 1);
-//         },
-//         UPDATE_TASK(state, { index, task }) {
-//             state.tasks[index] = task;
-//         }
-//     },
-//     actions: {
-//         addTask({ commit }, task) {
-//             commit('ADD_TASK', task);
-//         },
-//         deleteTask({ commit }, index) {
-//             commit('DELETE_TASK', index);
-//         },
-//         updateTask({ commit }, { index, task }) {
-//             commit('UPDATE_TASK', { index, task });
-//         }
-//     },
-//     getters: {
-//         tasks: (state) => state.tasks
-//     }
-// });
 
 
 
